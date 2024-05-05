@@ -10,7 +10,6 @@ class MySchema(pydantic.BaseModel):
     value: float
 
 erros = {"row_id":[], "error":[]}
-dataframe_erros = pd.DataFrame()
 
 for row in dataframe.to_dict(orient="records"):
     try:
