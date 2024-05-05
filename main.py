@@ -9,17 +9,17 @@ class MySchema(pydantic.BaseModel):
     name: str
     value: float
 
-erros = []
+erros = {"row_id":[], "error":[]}
 dataframe_erros = pd.DataFrame()
 
 for row in dataframe.to_dict(orient="records"):
     try:
         MySchema.model_validate(row)
-    except Exception as e:
-        erros.append(row.copy())
+    except pydantic.ValidationError as e:
+        erros["row_id"].append(row["row_id"])
+        erros["error"].append(e.json())
 
+dataframe_erros = dataframe[dataframe["row_id"].isin(erros.get("row_id"))]
+dataframe_filtrado = dataframe[~dataframe["row_id"].isin(erros)].drop(columns=["row_id"])
 
-dataframe_erros = pd.DataFrame(erros)
-dataframe_filtrado = dataframe[~dataframe["row_id"].isin(dataframe_erros["row_id"])].drop(columns=["row_id"])
-
-print(dataframe_erros, dataframe_filtrado, sep="\n\n")
+print(dataframe_erros, erros["error"], dataframe_filtrado, sep="\n\n")
